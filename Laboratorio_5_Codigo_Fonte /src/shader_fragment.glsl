@@ -84,9 +84,16 @@ void main()
         //   variável position_model
 
         vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+        vec4 c = bbox_center;
 
-        U = 0.0;
-        V = 0.0;
+        vec4 pp = c + normalize(position_model - c);
+        pp = pp - c;
+
+        float tetha = atan(pp.x, pp.z);
+        float phi = asin(pp.y);
+
+        U = (tetha + M_PI) / (2*M_PI);
+        V = (phi + (M_PI/2)) / M_PI;
     }
     else if ( object_id == BUNNY )
     {
@@ -108,8 +115,11 @@ void main()
         float minz = bbox_min.z;
         float maxz = bbox_max.z;
 
-        U = 0.0;
-        V = 0.0;
+        float px = (position_model.x - minx) / (maxx - minx);
+        float py = (position_model.y - miny) / (maxy - miny);
+
+        U = px;
+        V = py;
     }
     else if ( object_id == PLANE )
     {
@@ -121,10 +131,13 @@ void main()
     // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
     vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
 
+    vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
+
     // Equação de Iluminação
     float lambert = max(0,dot(n,l));
+    float lambert2 = max(0,dot(-n,l));
 
-    color.rgb = Kd0 * (lambert + 0.01);
+    color.rgb = (Kd0 * (lambert + 0.01)) + (Kd1 * (lambert2 + 0.05));
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:
@@ -143,5 +156,4 @@ void main()
     // Cor final com correção gamma, considerando monitor sRGB.
     // Veja https://en.wikipedia.org/w/index.php?title=Gamma_correction&oldid=751281772#Windows.2C_Mac.2C_sRGB_and_TV.2Fvideo_standard_gammas
     color.rgb = pow(color.rgb, vec3(1.0,1.0,1.0)/2.2);
-} 
-
+}
