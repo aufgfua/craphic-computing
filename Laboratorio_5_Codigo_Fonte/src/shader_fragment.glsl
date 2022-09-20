@@ -20,8 +20,8 @@ uniform mat4 projection;
 
 // Identificador que define qual objeto está sendo desenhado no momento
 #define SPHERE 0
-#define BUNNY  1
-#define PLANE  2
+#define HEART  1
+#define GHOST  2
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -95,7 +95,7 @@ void main()
         U = (tetha + M_PI) / (2*M_PI);
         V = (phi + (M_PI/2)) / M_PI;
     }
-    else if ( object_id == BUNNY )
+    else if ( object_id == HEART )
     {
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
         // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
@@ -121,7 +121,7 @@ void main()
         U = px;
         V = py;
     }
-    else if ( object_id == PLANE )
+    else if ( object_id == GHOST )
     {
         // Coordenadas de textura do plano, obtidas do arquivo OBJ.
         U = texcoords.x;
