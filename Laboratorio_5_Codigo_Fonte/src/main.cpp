@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
     // Criamos uma janela do sistema operacional, com 800 colunas e 600 linhas
     // de pixels, e com título "INF01047 ...".
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 600, "INF01047 - 302213 - Filipe Ilunga Xindanhi", NULL, NULL);
+    window = glfwCreateWindow(800, 600, "INF01047 - Filipe Ilunga Xindanhi - Augusto Falcão Flach", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -1083,7 +1083,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
 
         // Atualizamos parâmetros da câmera com os deslocamentos
         g_CameraTheta -= 0.01f*dx;
-        g_CameraPhi   += 0.01f*dy;
+        g_CameraPhi   -= 0.01f*dy;
 
         // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
         float phimax = 3.141592f/2;
