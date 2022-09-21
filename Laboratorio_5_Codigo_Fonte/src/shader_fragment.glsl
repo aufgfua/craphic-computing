@@ -32,13 +32,6 @@ uniform vec4 bbox_max;
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
-uniform sampler2D TextureImage3;
-uniform sampler2D TextureImage4;
-uniform sampler2D TextureImage5;
-uniform sampler2D TextureImage6;
-uniform sampler2D TextureImage7;
-uniform sampler2D TextureImage8;
-uniform sampler2D TextureImage9;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -106,7 +99,7 @@ void main()
         U = (tetha + M_PI) / (2*M_PI);
         V = (phi + (M_PI/2)) / M_PI;
 
-        Kd0 = texture(TextureImage1 , vec2(U,V)).rgb;
+        Kd0 = texture(TextureImage0 , vec2(U,V)).rgb;
 
 
     }
@@ -114,22 +107,21 @@ void main()
     {
         // Coordenadas de textura do fantasma, obtidas do arquivo OBJ.
 
-        float minx = bbox_min.x;
-        float maxx = bbox_max.x;
 
-        float miny = bbox_min.y;
-        float maxy = bbox_max.y;
+        vec4 bbox_center = (bbox_min + bbox_max) / 2.0;
+        vec4 c = bbox_center;
 
-        float minz = bbox_min.z;
-        float maxz = bbox_max.z;
+        vec4 pp = c + normalize(position_model - c);
+        pp = pp - c;
 
-        float px = (position_model.x - minx) / (maxx - minx);
-        float py = (position_model.y - miny) / (maxy - miny);
+        float tetha = atan(pp.x, pp.z);
+        float phi = asin(pp.y);
 
-        U = px;
-        V = py;
+        U = (tetha + M_PI) / (2*M_PI);
+        V = (phi + (M_PI/2)) / M_PI;
 
-        Kd0 = texture(TextureImage1, vec2(U,V)).rgb;
+        Kd0 = texture(TextureImage1 , vec2(U,V)).rgb;
+
     }
     else if ( object_id == HEART )
     {
@@ -167,6 +159,7 @@ void main()
     float lambert = max(0,dot(n,l));
 
     color.rgb = (Kd0 * (lambert + 0.01));
+
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:
