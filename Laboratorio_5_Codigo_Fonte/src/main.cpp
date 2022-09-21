@@ -295,8 +295,9 @@ int main(int argc, char* argv[])
     LoadShadersFromFiles();
 
     // Carregamos duas imagens para serem utilizadas como textura
-  //  LoadTextureImage("../../data/heartTexture.jpeg");      // TextureImage0
-    LoadTextureImage("../../data/ghostTexture.jpeg");      // TextureImage1
+    LoadTextureImage("../../data/pacmanTexture.jpg");      // TextureImage0
+    LoadTextureImage("../../data/ghostTexture.jpg");       // TextureImage1
+    LoadTextureImage("../../data/heartTexture.jpg");       // TextureImage2
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -388,7 +389,7 @@ int main(int argc, char* argv[])
 
 
             // e ScrollCallback().
-            float r = 10;
+            float r = g_CameraDistance;
             float y = camera_lookat_l.y + r*sin(g_CameraPhi);
             float z = camera_lookat_l.z + r*cos(g_CameraPhi)*cos(g_CameraTheta);
             float x = camera_lookat_l.x + r*cos(g_CameraPhi)*sin(g_CameraTheta);
@@ -484,14 +485,14 @@ int main(int argc, char* argv[])
         glUniform1i(object_id_uniform, SPHERE);
         DrawVirtualObject("sphere");
 
-        // Desenhamos o modelo do coelho
+        // Desenhamos o modelo do ghost
         model = Matrix_Translate(3.0f,0.0f,0.0f)
                 * Matrix_Scale(0.04f, 0.04f, 0.04f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, GHOST);
         DrawVirtualObject("ghost");
 
-        // Desenhamos o plano do chão
+        // Desenhamos o plano do heart
         model = Matrix_Translate(0.0f,-3.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, HEART);
@@ -555,6 +556,7 @@ void LoadTextureImage(const char* filename)
         std::exit(EXIT_FAILURE);
     }
 
+    printf(" - %d - ", g_NumLoadedTextures);
     printf("OK (%dx%d).\n", width, height);
 
     // Agora criamos objetos na GPU com OpenGL para armazenar a textura
@@ -578,6 +580,7 @@ void LoadTextureImage(const char* filename)
     glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 
     GLuint textureunit = g_NumLoadedTextures;
+    printf("\n%d\n",GL_TEXTURE0 + textureunit);
     glActiveTexture(GL_TEXTURE0 + textureunit);
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -1147,7 +1150,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         // Atualizamos parâmetros da câmera com os deslocamentos
         switch(view_mode){
             case FIRST_PERSON:
-                g_CameraPhi   -= 0.01f*dy;
+                g_CameraPhi   += 0.01f*dy;
                 break;
             case THIRD_PERSON:
                 g_CameraPhi   += 0.01f*dy;
@@ -1247,7 +1250,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
                 view_mode = THIRD_PERSON;
                 g_CameraPhi = 0;
                 g_CameraTheta = 0;
-                g_CameraDistance = 2;
+                g_CameraDistance = 5;
                 break;
             case THIRD_PERSON:
                 view_mode = FIRST_PERSON;
