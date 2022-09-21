@@ -295,8 +295,8 @@ int main(int argc, char* argv[])
     LoadShadersFromFiles();
 
     // Carregamos duas imagens para serem utilizadas como textura
-    LoadTextureImage("../../data/tc-earth_daymap_surface.jpg");      // TextureImage0
-    LoadTextureImage("../../data/tc-earth_nightmap_citylights.gif"); // TextureImage1
+  //  LoadTextureImage("../../data/heartTexture.jpeg");      // TextureImage0
+    LoadTextureImage("../../data/ghostTexture.jpeg");      // TextureImage1
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -371,14 +371,16 @@ int main(int argc, char* argv[])
             // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
             // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
             // e ScrollCallback().
+
+            // e ScrollCallback().
             float r = 1;
-            float y = r*sin(g_CameraPhi);
-            float z = r*cos(g_CameraPhi)*cos(g_CameraTheta);
-            float x = r*cos(g_CameraPhi)*sin(g_CameraTheta);
+            float y = pacman_position.y + r * sin(g_CameraPhi);
+            float z = pacman_position.z + r * cos(g_CameraPhi) * cos(g_CameraTheta);
+            float x = pacman_position.x + r * cos(g_CameraPhi) * sin(g_CameraTheta);
 
-            camera_view_vector = glm::vec4(x, y, z, 0.0f);
+            camera_position_c = glm::vec4(x, y, z, 1.0f);
 
-
+            camera_view_vector = pacman_position - camera_position_c;
         } else {
             // look at
 
@@ -386,7 +388,7 @@ int main(int argc, char* argv[])
 
 
             // e ScrollCallback().
-            float r = g_CameraDistance;
+            float r = 10;
             float y = camera_lookat_l.y + r*sin(g_CameraPhi);
             float z = camera_lookat_l.z + r*cos(g_CameraPhi)*cos(g_CameraTheta);
             float x = camera_lookat_l.x + r*cos(g_CameraPhi)*sin(g_CameraTheta);
@@ -666,8 +668,8 @@ void LoadShadersFromFiles()
     // Variáveis em "shader_fragment.glsl" para acesso das imagens de textura
     glUseProgram(program_id);
     glUniform1i(glGetUniformLocation(program_id, "TextureImage0"), 0);
-    glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
-    glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
+   // glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
+    glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 1);
     glUseProgram(0);
 }
 

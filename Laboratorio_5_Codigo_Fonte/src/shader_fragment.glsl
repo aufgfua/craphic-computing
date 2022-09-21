@@ -30,7 +30,7 @@ uniform vec4 bbox_max;
 
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
-uniform sampler2D TextureImage1;
+//uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
@@ -123,7 +123,7 @@ void main()
     }
     else if ( object_id == GHOST )
     {
-        // Coordenadas de textura do plano, obtidas do arquivo OBJ.
+        // Coordenadas de textura do fantasma, obtidas do arquivo OBJ.
         U = texcoords.x;
         V = texcoords.y;
     }
@@ -131,7 +131,7 @@ void main()
     // Obtemos a refletância difusa a partir da leitura da imagem TextureImage0
     vec3 Kd0 = texture(TextureImage0, vec2(U,V)).rgb;
 
-    vec3 Kd1 = texture(TextureImage1, vec2(U,V)).rgb;
+    vec3 Kd1 = texture(TextureImage2, vec2(U,V)).rgb;
 
     // Equação de Iluminação
     float lambert = max(0,dot(n,l));
