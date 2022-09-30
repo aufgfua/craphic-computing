@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
 
     // Carregamos duas imagens para serem utilizadas como textura
     LoadTextureImage("../../data/pacmanTexture.jpg");      // TextureImage0
-    LoadTextureImage("../../data/ghostTexture.jpg");       // TextureImage1
+    LoadTextureImage("../../data/ghostTexture.jpeg");      // TextureImage1
     LoadTextureImage("../../data/heartTexture.jpg");       // TextureImage2
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
@@ -311,6 +311,10 @@ int main(int argc, char* argv[])
     ObjModel heartmodel("../../data/heart.obj");
     ComputeNormals(&heartmodel);
     BuildTrianglesAndAddToVirtualScene(&heartmodel);
+
+    ObjModel planemodel("../../data/plane.obj");
+    ComputeNormals(&planemodel);
+    BuildTrianglesAndAddToVirtualScene(&planemodel);
 
     if ( argc > 1 )
     {
@@ -478,6 +482,7 @@ int main(int argc, char* argv[])
         #define SPHERE 0
         #define GHOST  1
         #define HEART  2
+        #define PLANE  3
 
         // Desenhamos o modelo da esfera
         model = Matrix_Translate(pacman_position.x, pacman_position.y, pacman_position.z);
@@ -493,10 +498,15 @@ int main(int argc, char* argv[])
         DrawVirtualObject("ghost");
 
         // Desenhamos o plano do heart
-        model = Matrix_Translate(0.0f,-3.0f,0.0f);
+        model = Matrix_Translate(0.0f,0.0f,0.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(object_id_uniform, HEART);
         DrawVirtualObject("heart");
+
+        model = Matrix_Translate(0.0f, -1.1f, 0.0f) * Matrix_Scale(50.0f, 1.0f, 50.0f);
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(object_id_uniform, PLANE);
+        DrawVirtualObject("plane");
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
