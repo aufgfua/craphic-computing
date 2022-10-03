@@ -216,6 +216,13 @@ int view_mode = FIRST_PERSON;
 
 
 
+// Recuperamos o número de segundos que passou desde a execução do programa
+float seconds = (float)glfwGetTime();
+float old_seconds = (float)glfwGetTime();
+// Número de segundos desde o último cálculo do fps
+float ellapsed_seconds = seconds - old_seconds;
+float delta_time = ellapsed_seconds;
+
 
 int main(int argc, char* argv[])
 {
@@ -342,6 +349,19 @@ int main(int argc, char* argv[])
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+
+
+        // Recuperamos o número de segundos que passou desde a execução do programa
+        seconds = (float)glfwGetTime();
+
+        // Número de segundos desde o último cálculo do fps
+        ellapsed_seconds = seconds - old_seconds;
+
+        old_seconds = seconds;
+
+        delta_time = ellapsed_seconds;
+
+
         // Aqui executamos as operações de renderização
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
@@ -419,7 +439,7 @@ int main(int argc, char* argv[])
         MOVIMENTO
 
         **/
-        float speed = 0.1;
+        float speed = 5.0f * delta_time;
         if (isMovingForward) {
             pacman_position_next -= speed * w;
         }
@@ -1157,16 +1177,18 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         float dx = xpos - g_LastCursorPosX;
         float dy = ypos - g_LastCursorPosY;
 
+        float movement_speed = 0.5f* delta_time;
+
         // Atualizamos parâmetros da câmera com os deslocamentos
         switch(view_mode){
             case FIRST_PERSON:
-                g_CameraPhi   += 0.01f*dy;
+                g_CameraPhi   += movement_speed*dy;
                 break;
             case THIRD_PERSON:
-                g_CameraPhi   += 0.01f*dy;
+                g_CameraPhi   += movement_speed*dy;
                 break;
         }
-        g_CameraTheta -= 0.01f*dx;
+        g_CameraTheta -= movement_speed*dx;
 
         // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
         float phimax = 3.141592f/2;
@@ -1184,37 +1206,6 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         g_LastCursorPosY = ypos;
     }
 
-    if (g_RightMouseButtonPressed)
-    {
-        // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
-        float dx = xpos - g_LastCursorPosX;
-        float dy = ypos - g_LastCursorPosY;
-
-        // Atualizamos parâmetros da antebraço com os deslocamentos
-        g_ForearmAngleZ -= 0.01f*dx;
-        g_ForearmAngleX += 0.01f*dy;
-
-        // Atualizamos as variáveis globais para armazenar a posição atual do
-        // cursor como sendo a última posição conhecida do cursor.
-        g_LastCursorPosX = xpos;
-        g_LastCursorPosY = ypos;
-    }
-
-    if (g_MiddleMouseButtonPressed)
-    {
-        // Deslocamento do cursor do mouse em x e y de coordenadas de tela!
-        float dx = xpos - g_LastCursorPosX;
-        float dy = ypos - g_LastCursorPosY;
-
-        // Atualizamos parâmetros da antebraço com os deslocamentos
-        g_TorsoPositionX += 0.01f*dx;
-        g_TorsoPositionY -= 0.01f*dy;
-
-        // Atualizamos as variáveis globais para armazenar a posição atual do
-        // cursor como sendo a última posição conhecida do cursor.
-        g_LastCursorPosX = xpos;
-        g_LastCursorPosY = ypos;
-    }
 }
 
 // Função callback chamada sempre que o usuário movimenta a "rodinha" do mouse.
@@ -1222,7 +1213,18 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // Atualizamos a distância da câmera para a origem utilizando a
     // movimentação da "rodinha", simulando um ZOOM.
-    g_CameraDistance -= 0.1f*yoffset;
+    g_CameraDistance -= 1.0f * yoffset * delta_time;
+
+    int maxCameraDistance = 10;
+    int minCameraDistance = 3;
+
+
+    if(g_CameraDistance > maxCameraDistance)
+        g_CameraDistance = maxCameraDistance;
+
+    if(g_CameraDistance < minCameraDistance)
+        g_CameraDistance = minCameraDistance;
+
 
     // Uma câmera look-at nunca pode estar exatamente "em cima" do ponto para
     // onde ela está olhando, pois isto gera problemas de divisão por zero na
@@ -1295,18 +1297,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     if (key == GLFW_KEY_Z && action == GLFW_PRESS)
     {
         g_AngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-    }
-
-    // Se o usuário apertar a tecla espaço, resetamos os ângulos de Euler para zero.
-    if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
-    {
-        g_AngleX = 0.0f;
-        g_AngleY = 0.0f;
-        g_AngleZ = 0.0f;
-        g_ForearmAngleX = 0.0f;
-        g_ForearmAngleZ = 0.0f;
-        g_TorsoPositionX = 0.0f;
-        g_TorsoPositionY = 0.0f;
     }
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
@@ -1469,25 +1459,22 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 
     // Variáveis estáticas (static) mantém seus valores entre chamadas
     // subsequentes da função!
-    static float old_seconds = (float)glfwGetTime();
     static int   ellapsed_frames = 0;
+    static float   time_counter = 0;
     static char  buffer[20] = "?? fps";
     static int   numchars = 7;
 
     ellapsed_frames += 1;
+    time_counter += ellapsed_seconds;
 
-    // Recuperamos o número de segundos que passou desde a execução do programa
-    float seconds = (float)glfwGetTime();
 
-    // Número de segundos desde o último cálculo do fps
-    float ellapsed_seconds = seconds - old_seconds;
-
-    if ( ellapsed_seconds > 1.0f )
+    if ( time_counter> 1.0f )
     {
-        numchars = snprintf(buffer, 20, "%.2f fps", ellapsed_frames / ellapsed_seconds);
+        numchars = snprintf(buffer, 20, "%.2f fps", 1/delta_time);
 
         old_seconds = seconds;
         ellapsed_frames = 0;
+        time_counter = 0;
     }
 
     float lineheight = TextRendering_LineHeight(window);
