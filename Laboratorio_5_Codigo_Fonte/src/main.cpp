@@ -121,6 +121,14 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+void initObjects();
+void initWalls();
+void initGhosts();
+void initHearts();
+
+void draw_world_objects();
+
+
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
 struct SceneObject
@@ -145,6 +153,7 @@ typedef struct STRUCT_OBJETO {
     glm::vec3 rotat;
     int object_type;
     char* object_obj;
+    bool active;
 } OBJETO;
 
 void draw_object(OBJETO obj);
@@ -236,6 +245,24 @@ Nosso código inicial
 #define FIRST_PERSON 1
 #define THIRD_PERSON 2
 int view_mode = FIRST_PERSON;
+
+
+
+// WORLD OBJECTS LIST
+//   SEM O PACMAN
+
+std::vector<OBJETO> world_objects;
+int world_objects_length = 0;
+void append_world_object(OBJETO obj){
+
+    world_objects.push_back(obj);
+
+}
+
+
+
+#define M_PI   3.14159265358979323846
+#define M_PI_2 1.57079632679489661923
 
 
 
@@ -348,11 +375,17 @@ int main(int argc, char* argv[])
     ComputeNormals(&planemodel);
     BuildTrianglesAndAddToVirtualScene(&planemodel);
 
+
+    // AQUI INICIALIZAMOS TODOS OS OBJETOS DA CENA
+    initObjects();
+
+
     if ( argc > 1 )
     {
         ObjModel model(argv[1]);
         BuildTrianglesAndAddToVirtualScene(&model);
     }
+
 
     // Inicializamos o código para renderização de texto.
     TextRendering_Init();
@@ -531,48 +564,31 @@ int main(int argc, char* argv[])
 //        #define GHOST  1
 //        #define HEART  2
 //        #define PLANE  3
+// deixei aqui em cima os defines só por referencia!!
 
+
+// daqui pra baixo, eu mudei o jeito que a gente printa
+// agora a gente usa uma struct que chamei de OBJETO
+// a gente passa o XYZ de translação, de escala e de rotação, o tipo do objeto (sphere, ghost...) e o nome do .obj
+// porque agora a gente pode ter um array de objetos
+// e printar todos eles com a função draw_object que eu criei (que recebe um OBJETO)
 
         OBJETO sphere = {
             glm::vec3(pacman_position.x, pacman_position.y, pacman_position.z),
             glm::vec3(1,1,1),
             glm::vec3(0,0,0),
             SPHERE,
-            "sphere"
+            "sphere",
+            1
         };
+
         draw_object(sphere);
 
+        draw_world_objects();
 
 
-        OBJETO ghost = {
-            glm::vec3(3, 0,0),
-            glm::vec3(0.04,0.04,0.04),
-            glm::vec3(0,0,0),
-            GHOST,
-            "ghost"
-        };
-        draw_object(ghost);
 
 
-        OBJETO heart = {
-            glm::vec3(-4, 0,0),
-            glm::vec3(1,1,1),
-            glm::vec3(0,0,0),
-            HEART,
-            "heart"
-        };
-        draw_object(heart);
-
-
-        OBJETO plane = {
-            glm::vec3(0,-1.1,0),
-            glm::vec3(50,1,50),
-            glm::vec3(0,0,0),
-            PLANE,
-            "plane"
-        };
-
-        draw_object(plane);
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
@@ -642,8 +658,8 @@ void LoadTextureImage(const char* filename)
     glGenSamplers(1, &sampler_id);
 
     // Veja slides 95-96 do documento Aula_20_Mapeamento_de_Texturas.pdf
-    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glSamplerParameteri(sampler_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
     // Parâmetros de amostragem da textura.
     glSamplerParameteri(sampler_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -1715,17 +1731,103 @@ void PrintObjModelInfo(ObjModel* model)
 
 
 void draw_object(OBJETO obj){
-
-        glm::mat4 model = Matrix_Scale(obj.scal.x, obj.scal.y, obj.scal.z)
-                * Matrix_Rotate_X(obj.rotat.x) * Matrix_Rotate_Y(obj.rotat.y) * Matrix_Rotate_Z(obj.rotat.z)
-                * Matrix_Translate(obj.trans.x, obj.trans.y, obj.trans.z);
-        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, obj.object_type);
-        DrawVirtualObject(obj.object_obj);
+    if(obj.active == 0)
+        return;
+        // Aqui é o código de DRAW do sor, mas usando o objeto genérico "obj" que recebemos de parametro
+    glm::mat4 model = Matrix_Translate(obj.trans.x, obj.trans.y, obj.trans.z)
+            * Matrix_Scale(obj.scal.x, obj.scal.y, obj.scal.z)
+            * Matrix_Rotate_X(obj.rotat.x) * Matrix_Rotate_Y(obj.rotat.y) * Matrix_Rotate_Z(obj.rotat.z);
+    glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+    glUniform1i(object_id_uniform, obj.object_type);
+    DrawVirtualObject(obj.object_obj);
 
 }
 
+void draw_world_objects(){
+    for(auto obj = world_objects.begin(); obj != world_objects.end(); ++obj){
+        if(obj->active){
+            draw_object(*obj);
+        }
+    }
+}
 
+
+void initObjects(){
+
+    initWalls();
+    initGhosts();
+    initHearts();
+
+}
+
+void initHearts(){
+    OBJETO heart = {
+        glm::vec3(-4, 0,3),
+        glm::vec3(1,1,1),
+        glm::vec3(0,0,0),
+        HEART,
+        "heart",
+        1
+    };
+    append_world_object(heart);
+    heart.trans = glm::vec3(-4, 0, 6);
+    append_world_object(heart);
+    heart.trans = glm::vec3(-4, 0, 9);
+    append_world_object(heart);
+    heart.trans = glm::vec3(-4, 0, 12);
+    append_world_object(heart);
+    heart.trans = glm::vec3(-4, 0, 15);
+    append_world_object(heart);
+}
+
+void initGhosts(){
+
+    OBJETO ghost = {
+        glm::vec3(3, 0,0),
+        glm::vec3(0.04,0.04,0.04),
+        glm::vec3(0,0,0),
+        GHOST,
+        "ghost",
+        1
+    };
+    append_world_object(ghost);
+    ghost.trans = glm::vec3(6, 0, 0);
+    append_world_object(ghost);
+    ghost.trans = glm::vec3(9, 0, 0);
+    append_world_object(ghost);
+    ghost.trans = glm::vec3(12, 0, 0);
+    append_world_object(ghost);
+    ghost.trans = glm::vec3(15, 0, 0);
+    append_world_object(ghost);
+
+}
+
+void initWalls(){
+
+    int tamanho = 10;
+
+    OBJETO floor = {
+        glm::vec3(0,-1,0),
+        glm::vec3(tamanho,1,tamanho),
+        glm::vec3(0,0,0),
+        PLANE,
+        "plane",
+        1
+    };
+    append_world_object(floor);
+
+    OBJETO wall = {
+        glm::vec3(tamanho,0,0),
+        glm::vec3(tamanho,1,tamanho),
+        glm::vec3(0,0,M_PI_2),
+        PLANE,
+        "plane",
+        1
+    };
+    append_world_object(wall);
+
+
+}
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
 // vim: set spell spelllang=pt_br :

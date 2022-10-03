@@ -178,8 +178,8 @@ void main()
         int scale = 20;
         int loop = 1;
 
-        float px = func_mod(position_model.x * scale, loop);
-        float pz = func_mod(position_model.z * scale, loop);
+        float px = position_model.x * scale;
+        float pz = position_model.z * scale;
         //float px = func_mod(position_model.x, stone_texture_x) / stone_texture_x;
         //float pz = func_mod(position_model.z, stone_texture_y) / stone_texture_y;
 
