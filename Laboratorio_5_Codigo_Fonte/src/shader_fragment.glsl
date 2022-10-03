@@ -156,10 +156,33 @@ void main()
 
 
     // Equação de Iluminação
-    float lambert = max(0,dot(n,l));
+    float lambert = max(0,dot(n,l)) / (length(n)*length(l));
 
-    color.rgb = (Kd0 * (lambert + 0.01));
+    // Equação de Iluminação
+    float inverted_lambert = max(0,dot(-n,l)) / (length(n)*length(l));
 
+    vec3 light_color = vec3(1.0f,1.0f,1.0f);
+
+    color.rgb = (Kd0 * (lambert + 0.01)) + (Kd0*(lambert + 0.05));
+
+    if(object_id == HEART) {
+        vec4 r = -l + 2 * n * (dot(n,l));
+        vec4 v_normal = v/length(v);
+        vec3 ks = vec3(1,1,1);
+        int q = 40;
+        int ql = 60;
+
+        bool blinn_phong = true;
+
+        if(blinn_phong){
+            vec4 h = (v+l) / length(v+l);
+            float positive_beta = max(0, dot(n,h));
+            color.rgb += ks*light_color*pow(positive_beta,ql);
+        } else {
+            float positive_rv = max(0, dot(r,v));
+            color.rgb += ks*light_color*pow(positive_rv,q);
+        }
+    }
 
     // NOTE: Se você quiser fazer o rendering de objetos transparentes, é
     // necessário:
