@@ -134,6 +134,21 @@ struct SceneObject
     glm::vec3    bbox_max;
 };
 
+#define SPHERE 0
+#define GHOST  1
+#define HEART  2
+#define PLANE  3
+
+typedef struct STRUCT_OBJETO {
+    glm::vec3 trans;
+    glm::vec3 scal;
+    glm::vec3 rotat;
+    int object_type;
+    char* object_obj;
+} OBJETO;
+
+void draw_object(OBJETO obj);
+
 // Abaixo definimos variáveis globais utilizadas em várias funções do código.
 
 // A cena virtual é uma lista de objetos nomeados, guardados em um dicionário
@@ -221,6 +236,7 @@ Nosso código inicial
 #define FIRST_PERSON 1
 #define THIRD_PERSON 2
 int view_mode = FIRST_PERSON;
+
 
 
 
@@ -511,35 +527,52 @@ int main(int argc, char* argv[])
         glUniform1i(interpolation_mode_uniform, interpolation_mode);
 
 
-        #define SPHERE 0
-        #define GHOST  1
-        #define HEART  2
-        #define PLANE  3
-
-        // Desenhamos o modelo da esfera
-        model = Matrix_Translate(pacman_position.x, pacman_position.y, pacman_position.z);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, SPHERE);
-        DrawVirtualObject("sphere");
-
-        // Desenhamos o modelo do ghost
-        model = Matrix_Translate(3.0f,0.0f,0.0f)
-                * Matrix_Scale(0.04f, 0.04f, 0.04f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, GHOST);
-        DrawVirtualObject("ghost");
-
-        // Desenhamos o plano do heart
-        model = Matrix_Translate(0.0f,0.0f,0.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(object_id_uniform, HEART);
-        DrawVirtualObject("heart");
+//        #define SPHERE 0
+//        #define GHOST  1
+//        #define HEART  2
+//        #define PLANE  3
 
 
-        model = Matrix_Translate(0.0f, -1.1f, 0.0f) * Matrix_Scale(50.0f, 1.0f, 50.0f);
-        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-        glUniform1i(object_id_uniform, PLANE);
-        DrawVirtualObject("plane");
+        OBJETO sphere = {
+            glm::vec3(pacman_position.x, pacman_position.y, pacman_position.z),
+            glm::vec3(1,1,1),
+            glm::vec3(0,0,0),
+            SPHERE,
+            "sphere"
+        };
+        draw_object(sphere);
+
+
+
+        OBJETO ghost = {
+            glm::vec3(3, 0,0),
+            glm::vec3(0.04,0.04,0.04),
+            glm::vec3(0,0,0),
+            GHOST,
+            "ghost"
+        };
+        draw_object(ghost);
+
+
+        OBJETO heart = {
+            glm::vec3(-4, 0,0),
+            glm::vec3(1,1,1),
+            glm::vec3(0,0,0),
+            HEART,
+            "heart"
+        };
+        draw_object(heart);
+
+
+        OBJETO plane = {
+            glm::vec3(0,-1.1,0),
+            glm::vec3(50,1,50),
+            glm::vec3(0,0,0),
+            PLANE,
+            "plane"
+        };
+
+        draw_object(plane);
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
@@ -1679,6 +1712,24 @@ void PrintObjModelInfo(ObjModel* model)
   }
 }
 
+
+
+void draw_object(OBJETO obj){
+
+        glm::mat4 model = Matrix_Scale(obj.scal.x, obj.scal.y, obj.scal.z)
+                * Matrix_Rotate_X(obj.rotat.x) * Matrix_Rotate_Y(obj.rotat.y) * Matrix_Rotate_Z(obj.rotat.z)
+                * Matrix_Translate(obj.trans.x, obj.trans.y, obj.trans.z);
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
+        glUniform1i(object_id_uniform, obj.object_type);
+        DrawVirtualObject(obj.object_obj);
+
+}
+
+
+
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
 // vim: set spell spelllang=pt_br :
+
+
+
 
