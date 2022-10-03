@@ -535,6 +535,7 @@ int main(int argc, char* argv[])
         glUniform1i(object_id_uniform, HEART);
         DrawVirtualObject("heart");
 
+
         model = Matrix_Translate(0.0f, -1.1f, 0.0f) * Matrix_Scale(50.0f, 1.0f, 50.0f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glUniform1i(object_id_uniform, PLANE);
