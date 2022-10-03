@@ -19,6 +19,14 @@ out vec4 position_world;
 out vec4 position_model;
 out vec4 normal;
 out vec2 texcoords;
+out float lambert_v;
+
+
+#define SPHERE 0
+#define GHOST  1
+#define HEART  2
+#define PLANE  3
+uniform int object_id;
 
 void main()
 {
@@ -63,5 +71,11 @@ void main()
 
     // Coordenadas de textura obtidas do arquivo OBJ (se existirem!)
     texcoords = texture_coefficients;
+
+
+    vec4 n = normalize(normal);
+    vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
+    lambert_v = max(0,dot(n,l));
+
 }
 

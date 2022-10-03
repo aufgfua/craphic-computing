@@ -7,6 +7,7 @@
 in vec4 position_world;
 in vec4 normal;
 
+in float lambert_v;
 // Posição do vértice atual no sistema de coordenadas local do modelo.
 in vec4 position_model;
 
@@ -22,16 +23,22 @@ uniform mat4 projection;
 #define SPHERE 0
 #define GHOST  1
 #define HEART  2
+#define PLANE  3
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
 uniform vec4 bbox_min;
 uniform vec4 bbox_max;
 
+#define PHONG 0
+#define GOURAUD 1
+uniform int interpolation_mode;
+
 // Variáveis para acesso das imagens de textura
 uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
+uniform sampler2D TextureImage3;
 
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
@@ -39,6 +46,11 @@ out vec4 color;
 // Constantes
 #define M_PI   3.14159265358979323846
 #define M_PI_2 1.57079632679489661923
+
+float func_mod(float x, float y) {
+    return x-y*floor(x/y);
+}
+
 
 void main()
 {
@@ -152,20 +164,51 @@ void main()
         Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
 
     }
+    else if ( object_id == PLANE )
+    {
+        // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
+        // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
+        // o slides 99-104 do documento Aula_20_Mapeamento_de_Texturas.pdf,
+        // e também use as variáveis min*/max* definidas abaixo para normalizar
+        // as coordenadas de textura U e V dentro do intervalo [0,1]. Para
+        // tanto, veja por exemplo o mapeamento da variável 'p_v' utilizando
+        // 'h' no slides 158-160 do documento Aula_20_Mapeamento_de_Texturas.pdf.
+        // Veja também a Questão 4 do Questionário 4 no Moodle.
+
+        int scale = 20;
+        int loop = 1;
+
+        float px = func_mod(position_model.x * scale, loop);
+        float pz = func_mod(position_model.z * scale, loop);
+        //float px = func_mod(position_model.x, stone_texture_x) / stone_texture_x;
+        //float pz = func_mod(position_model.z, stone_texture_y) / stone_texture_y;
+
+        U = px;
+        V = pz;
+
+
+        Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
+
+    }
 
 
 
     // Equação de Iluminação
-    float lambert = max(0,dot(n,l)) / (length(n)*length(l));
+    float lambert = max(0,dot(n,l));
+    float inverted_lambert = max(0,dot(-n,l));
+
+    if(interpolation_mode == GOURAUD) {
+        lambert = max(0,lambert_v);
+        inverted_lambert = max(0, -lambert_v);
+    }
 
     // Equação de Iluminação
-    float inverted_lambert = max(0,dot(-n,l)) / (length(n)*length(l));
 
     vec3 light_color = vec3(1.0f,1.0f,1.0f);
 
-    color.rgb = (Kd0 * (lambert + 0.01)) + (Kd0*(lambert + 0.05));
+    color.rgb = (Kd0 * (lambert + 0.01));
 
-    if(object_id == HEART) {
+    if(object_id == HEART || object_id == SPHERE) {
         vec4 r = -l + 2 * n * (dot(n,l));
         vec4 v_normal = v/length(v);
         vec3 ks = vec3(1,1,1);

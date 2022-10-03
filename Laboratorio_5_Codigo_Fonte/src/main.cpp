@@ -191,6 +191,7 @@ GLint projection_uniform;
 GLint object_id_uniform;
 GLint bbox_min_uniform;
 GLint bbox_max_uniform;
+GLint interpolation_mode_uniform;
 
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
@@ -201,6 +202,13 @@ glm::vec4 pacman_position_next = pacman_position;
 glm::vec4 camera_position_c = pacman_position;
 
 bool isMovingRight, isMovingLeft, isMovingForward, isMovingBackward = false;
+
+
+
+
+#define PHONG 0
+#define GOURAUD 1
+int interpolation_mode = PHONG;
 
 /**
 
@@ -305,6 +313,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/pacmanTexture.jpg");      // TextureImage0
     LoadTextureImage("../../data/ghostTexture.jpeg");      // TextureImage1
     LoadTextureImage("../../data/heartTexture.jpg");       // TextureImage2
+    LoadTextureImage("../../data/stoneTexture.jpg");       // TextureImage3
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -498,6 +507,9 @@ int main(int argc, char* argv[])
         // efetivamente aplicadas em todos os pontos.
         glUniformMatrix4fv(view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
+
+        glUniform1i(interpolation_mode_uniform, interpolation_mode);
+
 
         #define SPHERE 0
         #define GHOST  1
@@ -697,12 +709,14 @@ void LoadShadersFromFiles()
     object_id_uniform       = glGetUniformLocation(program_id, "object_id"); // Variável "object_id" em shader_fragment.glsl
     bbox_min_uniform        = glGetUniformLocation(program_id, "bbox_min");
     bbox_max_uniform        = glGetUniformLocation(program_id, "bbox_max");
+    interpolation_mode_uniform        = glGetUniformLocation(program_id, "interpolation_mode");
 
     // Variáveis em "shader_fragment.glsl" para acesso das imagens de textura
     glUseProgram(program_id);
     glUniform1i(glGetUniformLocation(program_id, "TextureImage0"), 0);
     glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
     glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
+    glUniform1i(glGetUniformLocation(program_id, "TextureImage3"), 3);
     glUseProgram(0);
 }
 
@@ -1213,7 +1227,7 @@ void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
     // Atualizamos a distância da câmera para a origem utilizando a
     // movimentação da "rodinha", simulando um ZOOM.
-    g_CameraDistance -= 1.0f * yoffset * delta_time;
+    g_CameraDistance -= 10.0f * yoffset * delta_time;
 
     int maxCameraDistance = 10;
     int minCameraDistance = 3;
@@ -1269,6 +1283,18 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
                 break;
         }
     }
+
+
+    if (key == GLFW_KEY_I && action == GLFW_PRESS)
+        switch(interpolation_mode){
+            case PHONG:
+                interpolation_mode = GOURAUD;
+            break;
+            case GOURAUD:
+                interpolation_mode = PHONG;
+            break;
+        }
+
 
 
     // Se o usuário pressionar a tecla ESC, fechamos a janela.
