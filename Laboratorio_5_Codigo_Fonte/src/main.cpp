@@ -216,6 +216,7 @@ GLint object_id_uniform;
 GLint bbox_min_uniform;
 GLint bbox_max_uniform;
 GLint interpolation_mode_uniform;
+GLint scale_proportion_uniform;
 
 // Número de texturas carregadas pela função LoadTextureImage()
 GLuint g_NumLoadedTextures = 0;
@@ -760,6 +761,7 @@ void LoadShadersFromFiles()
     bbox_min_uniform        = glGetUniformLocation(program_id, "bbox_min");
     bbox_max_uniform        = glGetUniformLocation(program_id, "bbox_max");
     interpolation_mode_uniform        = glGetUniformLocation(program_id, "interpolation_mode");
+    scale_proportion_uniform = glGetUniformLocation(program_id, "scale_proportion");
 
     // Variáveis em "shader_fragment.glsl" para acesso das imagens de textura
     glUseProgram(program_id);
@@ -1734,11 +1736,15 @@ void draw_object(OBJETO obj){
     if(obj.active == 0)
         return;
         // Aqui é o código de DRAW do sor, mas usando o objeto genérico "obj" que recebemos de parametro
-    glm::mat4 model = Matrix_Translate(obj.trans.x, obj.trans.y, obj.trans.z)
-            * Matrix_Scale(obj.scal.x, obj.scal.y, obj.scal.z)
-            * Matrix_Rotate_X(obj.rotat.x) * Matrix_Rotate_Y(obj.rotat.y) * Matrix_Rotate_Z(obj.rotat.z);
+    glm::mat4 model =
+             Matrix_Translate(obj.trans.x, obj.trans.y, obj.trans.z)
+            * Matrix_Rotate_X(obj.rotat.x) * Matrix_Rotate_Y(obj.rotat.y) * Matrix_Rotate_Z(obj.rotat.z)
+            * Matrix_Scale(obj.scal.x, obj.scal.y, obj.scal.z);
     glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
     glUniform1i(object_id_uniform, obj.object_type);
+    glUniform3f(scale_proportion_uniform, obj.scal.x, obj.scal.y, obj.scal.z);
+    if(obj.object_type == PLANE)
+    printf("obj.scal.x = %f, obj.scal.y = %f, obj.scal.z = %f\n", obj.scal.x, obj.scal.y, obj.scal.z);
     DrawVirtualObject(obj.object_obj);
 
 }
@@ -1817,24 +1823,24 @@ void initWalls(){
 
     OBJETO wall = {
         glm::vec3(tamanho,0,0),
-        glm::vec3(tamanho,1,tamanho),
+        glm::vec3(1,1,tamanho),
         glm::vec3(0,0,M_PI_2),
         PLANE,
         "plane",
         1
     };
 
-    OBJETO smallWall = {
+    OBJETO verySmallWall = {
         glm::vec3(tamanho, 0, 0),
-        glm::vec3(4, 1, 4),
+        glm::vec3(1, 1, 2),
         glm::vec3(0, 0, M_PI_2),
         PLANE,
         "plane",
         1};
 
-    OBJETO verySmallWall = {
+    OBJETO smallWall = {
         glm::vec3(tamanho, 0, 0),
-        glm::vec3(2, 1, 2),
+        glm::vec3(1, 1, 4),
         glm::vec3(0, 0, M_PI_2),
         PLANE,
         "plane",
@@ -1842,7 +1848,7 @@ void initWalls(){
 
     OBJETO middleWall = {
         glm::vec3(tamanho, 0, 0),
-        glm::vec3(8, 1, 8),
+        glm::vec3(1, 1, 8),
         glm::vec3(0, 0, M_PI_2),
         PLANE,
         "plane",

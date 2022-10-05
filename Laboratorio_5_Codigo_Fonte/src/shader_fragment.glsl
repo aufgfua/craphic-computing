@@ -40,6 +40,9 @@ uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
 uniform sampler2D TextureImage3;
 
+
+uniform vec3 scale_proportion;
+
 // O valor de saída ("out") de um Fragment Shader é a cor final do fragmento.
 out vec4 color;
 
@@ -71,7 +74,7 @@ void main()
     vec4 n = normalize(normal);
 
     // Vetor que define o sentido da fonte de luz em relação ao ponto atual.
-    vec4 l = normalize(vec4(1.0,1.0,0.0,0.0));
+    vec4 l = normalize(vec4(1.0,1.0,1.0,0.0));
 
     // Vetor que define o sentido da câmera em relação ao ponto atual.
     vec4 v = normalize(camera_position - p);
@@ -178,8 +181,12 @@ void main()
         int scale = 20;
         int loop = 1;
 
-        float px = position_model.x * scale;
-        float pz = position_model.z * scale;
+        float scale_props = scale_proportion.x / scale_proportion.z;
+        float z_scale_scale = scale / scale_proportion.z;
+
+
+        float px = position_model.x * scale * scale_props / z_scale_scale;
+        float pz = position_model.z * scale / z_scale_scale;
         //float px = func_mod(position_model.x, stone_texture_x) / stone_texture_x;
         //float pz = func_mod(position_model.z, stone_texture_y) / stone_texture_y;
 
@@ -206,7 +213,10 @@ void main()
 
     vec3 light_color = vec3(1.0f,1.0f,1.0f);
 
-    color.rgb = (Kd0 * (lambert + 0.01));
+    float ambient_light_const = 0.1;
+
+
+    color.rgb = (Kd0 * min(lambert + ambient_light_const, 1));
 
     if(object_id == HEART || object_id == SPHERE) {
         vec4 r = -l + 2 * n * (dot(n,l));
