@@ -228,6 +228,12 @@ glm::vec4 pacman_position_next = pacman_position;
 glm::vec4 pacman_position_next_vector = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
 glm::vec4 camera_position_c = pacman_position;
 
+std::vector<OBJETO> ghosts;
+std::vector<int> ghostsRoutes;
+
+std::vector<OBJETO> hearts;
+std::vector<int> heartsAvailable;
+
 bool isMovingRight, isMovingLeft, isMovingForward, isMovingBackward = false;
 
 
@@ -1848,22 +1854,27 @@ void initHearts(){
 
 void initGhosts(){
 
+    float ghostHeight = -0.35;
+
     OBJETO ghost = {
-        glm::vec3(3, 0,0),
+        glm::vec3(3, ghostHeight,0),
         glm::vec3(0.02,0.02,0.02),
         glm::vec3(0,0,0),
         GHOST,
         "ghost",
         1
     };
+    ghost.trans = glm::vec3(1, ghostHeight, 9);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(6, 0, 9);
+    ghost.trans = glm::vec3(-9, ghostHeight, 6);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(9, 0, 0);
+    ghost.trans = glm::vec3(2, ghostHeight, 4);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(12, 0, 0);
+    ghost.trans = glm::vec3(9, ghostHeight, -2);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(15, 0, 0);
+    ghost.trans = glm::vec3(-9, ghostHeight, -4);
+    append_world_object(ghost);
+    ghost.trans = glm::vec3(-2, ghostHeight, -9);
     append_world_object(ghost);
 }
 
