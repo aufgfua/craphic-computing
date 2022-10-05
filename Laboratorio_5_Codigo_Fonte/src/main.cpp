@@ -461,7 +461,7 @@ int main(int argc, char* argv[])
             float z = pacman_position.z + r * cos(g_CameraPhi) * cos(g_CameraTheta);
             float x = pacman_position.x + r * cos(g_CameraPhi) * sin(g_CameraTheta);
 
-            camera_position_c = glm::vec4(x, y, z, 1.0f);
+            camera_position_c = glm::vec4(x, 0, z, 1.0f);
 
             camera_view_vector = pacman_position - camera_position_c;
         } else {
@@ -476,7 +476,7 @@ int main(int argc, char* argv[])
             float z = camera_lookat_l.z + r*cos(g_CameraPhi)*cos(g_CameraTheta);
             float x = camera_lookat_l.x + r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-            camera_position_c  = glm::vec4(x,y,z,1.0f);
+            camera_position_c  = glm::vec4(x,0,z,1.0f);
 
             camera_view_vector = camera_lookat_l - camera_position_c;
 
@@ -1791,7 +1791,7 @@ void initGhosts(){
         1
     };
     append_world_object(ghost);
-    ghost.trans = glm::vec3(6, 0, 0);
+    ghost.trans = glm::vec3(6, 0, 9);
     append_world_object(ghost);
     ghost.trans = glm::vec3(9, 0, 0);
     append_world_object(ghost);
@@ -1825,22 +1825,28 @@ void initWalls(){
     };
 
     OBJETO smallWall = {
-        glm::vec3(3, 0, 0),
-        glm::vec3(4, 1, tamanho),
+        glm::vec3(tamanho, 0, 0),
+        glm::vec3(4, 1, 4),
         glm::vec3(0, 0, M_PI_2),
         PLANE,
         "plane",
-        1
-    };
+        1};
 
     OBJETO verySmallWall = {
-        glm::vec3(3, 0, 0),
-        glm::vec3(2, 1, tamanho),
+        glm::vec3(tamanho, 0, 0),
+        glm::vec3(2, 1, 2),
         glm::vec3(0, 0, M_PI_2),
         PLANE,
         "plane",
-        1
-    };
+        1};
+
+    OBJETO middleWall = {
+        glm::vec3(tamanho, 0, 0),
+        glm::vec3(8, 1, 8),
+        glm::vec3(0, 0, M_PI_2),
+        PLANE,
+        "plane",
+        1};
 
     append_world_object(wall);
 
@@ -1848,20 +1854,76 @@ void initWalls(){
     append_world_object(wall);
 
     wall.trans = glm::vec3(0, 0, 10);
-    wall.rotat.y = 3.141592 / 2;
+    wall.rotat.y = M_PI_2;
     append_world_object(wall);
 
     smallWall.trans = glm::vec3(4, 0, 8);
-    smallWall.rotat.y = 3.141592 / 2;
+    smallWall.rotat.y = M_PI_2;
     append_world_object(smallWall);
 
     verySmallWall.trans = glm::vec3(-5, 0, 8);
-    verySmallWall.rotat.y = 3.141592 / 2;
+    verySmallWall.rotat.y = M_PI_2;
+    append_world_object(verySmallWall);
+
+    middleWall.trans = glm::vec3(0, 0, 6);
+    middleWall.rotat.y = M_PI_2;
+    append_world_object(middleWall);
+
+    smallWall.trans = glm::vec3(8, 0, 4);
+    smallWall.rotat.y = 0.0;
+    append_world_object(smallWall);
+
+    smallWall.trans = glm::vec3(-6, 0, 4);
+    smallWall.rotat.y = M_PI_2;
+    append_world_object(smallWall);
+
+    verySmallWall.trans = glm::vec3(6, 0, 4);
+    verySmallWall.rotat.y = M_PI_2;
+    append_world_object(verySmallWall);
+
+    verySmallWall.trans = glm::vec3(1, 0, 4);
+    verySmallWall.rotat.y = 0.0;
+    append_world_object(verySmallWall);
+
+    verySmallWall.trans = glm::vec3(-1, 0, 2);
+    verySmallWall.rotat.y = M_PI_2;
+    append_world_object(verySmallWall);
+
+    verySmallWall.trans = glm::vec3(-8, 0, 2);
+    verySmallWall.rotat.y = M_PI_2;
+    append_world_object(verySmallWall);
+
+    verySmallWall.trans = glm::vec3(3, 0, 2);
+    verySmallWall.rotat.y = M_PI_2;
+    append_world_object(verySmallWall);
+
+    smallWall.trans = glm::vec3(4, 0, -4);
+    smallWall.rotat.y = M_PI_2;
+    append_world_object(smallWall);
+
+    verySmallWall.trans = glm::vec3(-5, 0, -4);
+    verySmallWall.rotat.y = M_PI_2;
+    append_world_object(verySmallWall);
+
+    middleWall.trans = glm::vec3(0, 0, 0);
+    middleWall.rotat.y = M_PI_2;
+    append_world_object(middleWall);
+
+    middleWall.trans = glm::vec3(-2, 0, -2);
+    middleWall.rotat.y = M_PI_2;
+    append_world_object(middleWall);
+
+
+
+    verySmallWall.trans = glm::vec3(8, 0, -6);
+    verySmallWall.rotat.y = 0.0;
     append_world_object(verySmallWall);
 
     wall.trans = glm::vec3(0, 0, -10);
-    wall.rotat.y = 3.141592 / 2;
+    wall.rotat.y = M_PI_2;
     append_world_object(wall);
+
+
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
