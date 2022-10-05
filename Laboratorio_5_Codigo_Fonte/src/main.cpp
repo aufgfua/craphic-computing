@@ -1913,7 +1913,17 @@ void initWalls(){
     middleWall.rotat.y = M_PI_2;
     append_world_object(middleWall);
 
+    middleWall.trans = glm::vec3(-2, 0, -6);
+    middleWall.rotat.y = M_PI_2;
+    append_world_object(middleWall);
 
+    smallWall.trans = glm::vec3(4, 0, -8);
+    smallWall.rotat.y = M_PI_2;
+    append_world_object(smallWall);
+
+    verySmallWall.trans = glm::vec3(-5, 0, -8);
+    verySmallWall.rotat.y = M_PI_2;
+    append_world_object(verySmallWall);
 
     verySmallWall.trans = glm::vec3(8, 0, -6);
     verySmallWall.rotat.y = 0.0;
