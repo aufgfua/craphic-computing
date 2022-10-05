@@ -1763,7 +1763,7 @@ void initObjects(){
 void initHearts(){
     OBJETO heart = {
         glm::vec3(-4, 0,3),
-        glm::vec3(1,1,1),
+        glm::vec3(0.4,0.5,0.5),
         glm::vec3(0,0,0),
         HEART,
         "heart",
@@ -1784,7 +1784,7 @@ void initGhosts(){
 
     OBJETO ghost = {
         glm::vec3(3, 0,0),
-        glm::vec3(0.04,0.04,0.04),
+        glm::vec3(0.02,0.02,0.02),
         glm::vec3(0,0,0),
         GHOST,
         "ghost",
@@ -1799,7 +1799,6 @@ void initGhosts(){
     append_world_object(ghost);
     ghost.trans = glm::vec3(15, 0, 0);
     append_world_object(ghost);
-
 }
 
 void initWalls(){
@@ -1824,9 +1823,45 @@ void initWalls(){
         "plane",
         1
     };
+
+    OBJETO smallWall = {
+        glm::vec3(3, 0, 0),
+        glm::vec3(4, 1, tamanho),
+        glm::vec3(0, 0, M_PI_2),
+        PLANE,
+        "plane",
+        1
+    };
+
+    OBJETO verySmallWall = {
+        glm::vec3(3, 0, 0),
+        glm::vec3(2, 1, tamanho),
+        glm::vec3(0, 0, M_PI_2),
+        PLANE,
+        "plane",
+        1
+    };
+
     append_world_object(wall);
 
+    wall.trans = glm::vec3(-10, 0, 0);
+    append_world_object(wall);
 
+    wall.trans = glm::vec3(0, 0, 10);
+    wall.rotat.y = 3.141592 / 2;
+    append_world_object(wall);
+
+    smallWall.trans = glm::vec3(4, 0, 8);
+    smallWall.rotat.y = 3.141592 / 2;
+    append_world_object(smallWall);
+
+    verySmallWall.trans = glm::vec3(-5, 0, 8);
+    verySmallWall.rotat.y = 3.141592 / 2;
+    append_world_object(verySmallWall);
+
+    wall.trans = glm::vec3(0, 0, -10);
+    wall.rotat.y = 3.141592 / 2;
+    append_world_object(wall);
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
