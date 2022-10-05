@@ -146,6 +146,7 @@ struct SceneObject
 #define GHOST  1
 #define HEART  2
 #define PLANE  3
+#define FLOOR  4
 
 typedef struct STRUCT_OBJETO {
     glm::vec3 trans;
@@ -358,6 +359,7 @@ int main(int argc, char* argv[])
     LoadTextureImage("../../data/ghostTexture.jpeg");      // TextureImage1
     LoadTextureImage("../../data/heartTexture.jpg");       // TextureImage2
     LoadTextureImage("../../data/stoneTexture.jpg");       // TextureImage3
+    LoadTextureImage("../../data/floorTexture.jpg");       // TextureImage4
 
     // Construímos a representação de objetos geométricos através de malhas de triângulos
     ObjModel spheremodel("../../data/sphere.obj");
@@ -462,9 +464,9 @@ int main(int argc, char* argv[])
             float z = pacman_position.z + r * cos(g_CameraPhi) * cos(g_CameraTheta);
             float x = pacman_position.x + r * cos(g_CameraPhi) * sin(g_CameraTheta);
 
-            camera_position_c = glm::vec4(x, y, z, 1.0f);
+            camera_view_vector = glm::vec4(x, y, z, 1.0f);
 
-            camera_view_vector = pacman_position - camera_position_c;
+            camera_view_vector = pacman_position - camera_view_vector;
         } else {
             // look at
 
@@ -499,17 +501,24 @@ int main(int argc, char* argv[])
 
         **/
         float speed = 5.0f * delta_time;
+
+        glm::vec4 xz_vector_w = glm::vec4(w.x, 0.0f, w.z, 0.0f);
+        xz_vector_w = xz_vector_w / norm(xz_vector_w);
+
+        glm::vec4 xz_vector_u = glm::vec4(u.x, 0.0f, u.z, 0.0f);
+        xz_vector_u = xz_vector_u / norm(xz_vector_u);
+
         if (isMovingForward) {
-            pacman_position_next -= speed * w;
+            pacman_position_next -= speed * xz_vector_w;
         }
         if (isMovingBackward) {
-            pacman_position_next += speed * w;
+            pacman_position_next += speed * xz_vector_w;
         }
         if (isMovingLeft) {
-            pacman_position_next -= speed * u;
+            pacman_position_next -= speed * xz_vector_u;
         }
         if (isMovingRight) {
-            pacman_position_next += speed * u;
+            pacman_position_next += speed * xz_vector_u;
         }
 
 
@@ -527,7 +536,7 @@ int main(int argc, char* argv[])
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -100.0f; // Posição do "far plane"
+        float farplane  = -50.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -577,7 +586,7 @@ int main(int argc, char* argv[])
         OBJETO sphere = {
             glm::vec3(pacman_position.x, pacman_position.y, pacman_position.z),
             glm::vec3(1,1,1),
-            glm::vec3(0,0,0),
+            glm::vec3(-1,-1,-1),
             SPHERE,
             "sphere",
             1
@@ -769,6 +778,7 @@ void LoadShadersFromFiles()
     glUniform1i(glGetUniformLocation(program_id, "TextureImage1"), 1);
     glUniform1i(glGetUniformLocation(program_id, "TextureImage2"), 2);
     glUniform1i(glGetUniformLocation(program_id, "TextureImage3"), 3);
+    glUniform1i(glGetUniformLocation(program_id, "TextureImage4"), 4);
     glUseProgram(0);
 }
 
@@ -1815,7 +1825,7 @@ void initWalls(){
         glm::vec3(0,-1,0),
         glm::vec3(tamanho,1,tamanho),
         glm::vec3(0,0,0),
-        PLANE,
+        FLOOR,
         "plane",
         1
     };

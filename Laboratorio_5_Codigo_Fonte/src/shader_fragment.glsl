@@ -24,6 +24,7 @@ uniform mat4 projection;
 #define GHOST  1
 #define HEART  2
 #define PLANE  3
+#define FLOOR  4
 uniform int object_id;
 
 // Parâmetros da axis-aligned bounding box (AABB) do modelo
@@ -39,6 +40,7 @@ uniform sampler2D TextureImage0;
 uniform sampler2D TextureImage1;
 uniform sampler2D TextureImage2;
 uniform sampler2D TextureImage3;
+uniform sampler2D TextureImage4;
 
 
 uniform vec3 scale_proportion;
@@ -167,7 +169,7 @@ void main()
         Kd0 = texture(TextureImage2, vec2(U,V)).rgb;
 
     }
-    else if ( object_id == PLANE )
+    else if ( object_id == PLANE  || object_id == FLOOR )
     {
         // PREENCHA AQUI as coordenadas de textura do coelho, computadas com
         // projeção planar XY em COORDENADAS DO MODELO. Utilize como referência
@@ -193,9 +195,10 @@ void main()
         U = px;
         V = pz;
 
-
-        Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
-
+        if(object_id == PLANE)
+            Kd0 = texture(TextureImage3, vec2(U,V)).rgb;
+        else
+            Kd0 = texture(TextureImage4, vec2(U,V)).rgb;
     }
 
 
@@ -213,7 +216,7 @@ void main()
 
     vec3 light_color = vec3(1.0f,1.0f,1.0f);
 
-    float ambient_light_const = 0.1;
+    float ambient_light_const = 0.2;
 
 
     color.rgb = (Kd0 * min(lambert + ambient_light_const, 1));
