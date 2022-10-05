@@ -126,6 +126,9 @@ void initWalls();
 void initGhosts();
 void initHearts();
 
+void moveGhosts();
+
+
 void draw_world_objects();
 
 
@@ -228,11 +231,18 @@ glm::vec4 pacman_position_next = pacman_position;
 glm::vec4 pacman_position_next_vector = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
 glm::vec4 camera_position_c = pacman_position;
 
-std::vector<OBJETO> ghosts;
-std::vector<int> ghostsRoutes;
+std::vector<glm::vec4> ghostsRoutes;
 
-std::vector<OBJETO> hearts;
-std::vector<int> heartsAvailable;
+typedef struct DIRECTION_STR {
+    int direction;
+} DIRECTION;
+
+#define GOING 0
+#define RETURNING 1
+std::vector<DIRECTION_STR> ghostDirection;
+
+
+void initRoutes();
 
 bool isMovingRight, isMovingLeft, isMovingForward, isMovingBackward = false;
 
@@ -288,6 +298,8 @@ int main(int argc, char* argv[])
 {
 
 
+
+    initRoutes();
 
 
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
@@ -607,6 +619,8 @@ int main(int argc, char* argv[])
         };
 
         draw_object(sphere);
+
+        moveGhosts();
 
         draw_world_objects();
 
@@ -1800,22 +1814,27 @@ void initHearts(){
         1
     };
 
+
     // 4 pontas
     heart.trans = glm::vec3(9, baseHeartHeight, 9);
     heart.rotat = glm::vec3(0, M_PI_2/2, 0);
     append_world_object(heart);
+    
 
     heart.trans = glm::vec3(9,baseHeartHeight, -9);
     heart.rotat = glm::vec3(0, -M_PI_2/2, 0);
     append_world_object(heart);
+    
 
     heart.trans = glm::vec3(-9,baseHeartHeight, 9);
     heart.rotat = glm::vec3(0, -M_PI_2/2, 0);
     append_world_object(heart);
+    
 
     heart.trans = glm::vec3(-9,baseHeartHeight, -9);
     heart.rotat = glm::vec3(0, M_PI_2/2, 0);
     append_world_object(heart);
+    
 
 
     heart.rotat = glm::vec3(0, M_PI_2, 0);
@@ -1823,32 +1842,39 @@ void initHearts(){
     // mapa gerado - esquerda  p direita
     heart.trans = glm::vec3(7,baseHeartHeight, 7);
     append_world_object(heart);
+    
 
     heart.trans = glm::vec3(7,baseHeartHeight, 5);
     append_world_object(heart);
+    
 
 
     heart.rotat = glm::vec3(0, M_PI_2/2, 0);
     heart.trans = glm::vec3(0,baseHeartHeight, 5);
     append_world_object(heart);
+    
 
 
     heart.rotat = glm::vec3(0, M_PI_2, 0);
 
     heart.trans = glm::vec3(-9,baseHeartHeight, 3);
     append_world_object(heart);
+    
 
 
     heart.trans = glm::vec3(-9,baseHeartHeight, 0);
     append_world_object(heart);
+    
 
 
 
     heart.trans = glm::vec3(-9,baseHeartHeight, -4);
     append_world_object(heart);
+    
 
     heart.trans = glm::vec3(7,baseHeartHeight, -6);
     append_world_object(heart);
+    
 
 }
 
@@ -1864,18 +1890,35 @@ void initGhosts(){
         "ghost",
         1
     };
-    ghost.trans = glm::vec3(1, ghostHeight, 9);
+    ghost.trans = glm::vec3(6, ghostHeight, 9);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(-9, ghostHeight, 6);
+    ghostDirection.push_back({GOING});
+    
+    ghost.trans = glm::vec3(-8, ghostHeight, 6);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(2, ghostHeight, 4);
+    ghostDirection.push_back({GOING});
+    
+    ghost.trans = glm::vec3(5, ghostHeight, 1);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(9, ghostHeight, -2);
+    ghostDirection.push_back({GOING});
+    
+    ghost.trans = glm::vec3(6, ghostHeight, -3);
     append_world_object(ghost);
-    ghost.trans = glm::vec3(-9, ghostHeight, -4);
+    ghostDirection.push_back({GOING});
+    
+    ghost.trans = glm::vec3(-2, ghostHeight, -5);
     append_world_object(ghost);
+    ghostDirection.push_back({GOING});
+    
     ghost.trans = glm::vec3(-2, ghostHeight, -9);
     append_world_object(ghost);
+    ghostDirection.push_back({GOING});
+
+
+    ghost.trans = glm::vec3(9, ghostHeight, -7);
+    append_world_object(ghost);
+    ghostDirection.push_back({GOING});
+    
 }
 
 void initWalls(){
@@ -2011,6 +2054,91 @@ void initWalls(){
     append_world_object(wall);
 
 
+}
+
+void initRoutes(){
+    float ghostHeight = -0.3;
+    ghostsRoutes.push_back(glm::vec4(9, ghostHeight, 9, 1));
+    ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, 9, 1));
+
+
+
+    ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, 5, 1));
+    ghostsRoutes.push_back(glm::vec4(0, ghostHeight, 5, 1));
+
+
+
+    ghostsRoutes.push_back(glm::vec4(7, ghostHeight, 1, 1));
+    ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, 1, 1));
+
+
+
+
+    ghostsRoutes.push_back(glm::vec4(9, ghostHeight, -3, 1));
+    ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, -3, 1));
+
+
+
+
+    ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, -5, 1));
+    ghostsRoutes.push_back(glm::vec4(7, ghostHeight, -5, 1));
+
+
+    ghostsRoutes.push_back(glm::vec4(9, ghostHeight, -9, 1));
+    ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, -9, 1));
+
+
+    ghostsRoutes.push_back(glm::vec4(9, ghostHeight, 8, 1));
+    ghostsRoutes.push_back(glm::vec4(9, ghostHeight, -8, 1));
+}
+
+
+void moveGhosts(){
+
+    int ghostCount = 0;
+    int speed = 2;
+
+    for(auto obj = world_objects.begin(); obj != world_objects.end(); ++obj){
+        if(obj->active && obj->object_type == GHOST){
+            int returningPathNumber = 2*ghostCount;
+            int goingPathNumber = 2*ghostCount+1;
+
+            glm::vec4 currentLocation = glm::vec4(obj->trans.x, obj->trans.y, obj->trans.z, 1);
+            glm::vec4 returningPath = ghostsRoutes[returningPathNumber];
+            glm::vec4 goingPath = ghostsRoutes[goingPathNumber];
+
+            glm::vec4 chosenPath;
+
+            if(ghostDirection[ghostCount].direction == GOING) {
+                chosenPath = goingPath;
+            } else {
+                chosenPath = returningPath;
+            }
+
+            glm::vec4 direction = chosenPath - currentLocation;
+            float distance = glm::length(direction);
+
+            if(distance < 0.5) {
+                if(ghostDirection[ghostCount].direction == GOING) {
+                    ghostDirection[ghostCount].direction = RETURNING;
+                } else {
+                    ghostDirection[ghostCount].direction = GOING;
+                }
+            }
+
+            direction = glm::normalize(direction);
+
+            obj->trans.x += direction.x * speed * delta_time;
+            obj->trans.z += direction.z * speed * delta_time;
+
+
+            float turned_angle = atan2(direction.x, direction.z) - M_PI_2;
+            obj->rotat.y = turned_angle;
+
+
+            ghostCount++;
+        }
+    }
 }
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
