@@ -223,9 +223,9 @@ GLint scale_proportion_uniform;
 GLuint g_NumLoadedTextures = 0;
 
 
-glm::vec4 pacman_position = glm::vec4(0.0f, 0.0f, -2.0f, 1.0f);
+glm::vec4 pacman_position = glm::vec4(0, 0, -1, 1.0f);
 glm::vec4 pacman_position_next = pacman_position;
-glm::vec4 pacman_position_next_vector = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
+glm::vec4 pacman_position_next_vector = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
 glm::vec4 camera_position_c = pacman_position;
 
 bool isMovingRight, isMovingLeft, isMovingForward, isMovingBackward = false;
@@ -1783,23 +1783,67 @@ void initObjects(){
 }
 
 void initHearts(){
+    float baseHeartHeight = -0.3;
+
     OBJETO heart = {
-        glm::vec3(-4, 0,3),
-        glm::vec3(0.4,0.5,0.5),
+        glm::vec3(0, baseHeartHeight, 0),
+        glm::vec3(0.2,0.35,0.35),
         glm::vec3(0,0,0),
         HEART,
         "heart",
         1
     };
+
+    // 4 pontas
+    heart.trans = glm::vec3(9, baseHeartHeight, 9);
+    heart.rotat = glm::vec3(0, M_PI_2/2, 0);
     append_world_object(heart);
-    heart.trans = glm::vec3(-4, 0, 6);
+
+    heart.trans = glm::vec3(9,baseHeartHeight, -9);
+    heart.rotat = glm::vec3(0, -M_PI_2/2, 0);
     append_world_object(heart);
-    heart.trans = glm::vec3(-4, 0, 9);
+
+    heart.trans = glm::vec3(-9,baseHeartHeight, 9);
+    heart.rotat = glm::vec3(0, -M_PI_2/2, 0);
     append_world_object(heart);
-    heart.trans = glm::vec3(-4, 0, 12);
+
+    heart.trans = glm::vec3(-9,baseHeartHeight, -9);
+    heart.rotat = glm::vec3(0, M_PI_2/2, 0);
     append_world_object(heart);
-    heart.trans = glm::vec3(-4, 0, 15);
+
+
+    heart.rotat = glm::vec3(0, M_PI_2, 0);
+
+    // mapa gerado - esquerda  p direita
+    heart.trans = glm::vec3(7,baseHeartHeight, 7);
     append_world_object(heart);
+
+    heart.trans = glm::vec3(7,baseHeartHeight, 5);
+    append_world_object(heart);
+
+
+    heart.rotat = glm::vec3(0, M_PI_2/2, 0);
+    heart.trans = glm::vec3(0,baseHeartHeight, 5);
+    append_world_object(heart);
+
+
+    heart.rotat = glm::vec3(0, M_PI_2, 0);
+
+    heart.trans = glm::vec3(-9,baseHeartHeight, 3);
+    append_world_object(heart);
+
+
+    heart.trans = glm::vec3(-9,baseHeartHeight, 0);
+    append_world_object(heart);
+
+
+
+    heart.trans = glm::vec3(-9,baseHeartHeight, -4);
+    append_world_object(heart);
+
+    heart.trans = glm::vec3(7,baseHeartHeight, -6);
+    append_world_object(heart);
+
 }
 
 void initGhosts(){
