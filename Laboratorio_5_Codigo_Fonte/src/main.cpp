@@ -461,7 +461,7 @@ int main(int argc, char* argv[])
             float z = pacman_position.z + r * cos(g_CameraPhi) * cos(g_CameraTheta);
             float x = pacman_position.x + r * cos(g_CameraPhi) * sin(g_CameraTheta);
 
-            camera_position_c = glm::vec4(x, 0, z, 1.0f);
+            camera_position_c = glm::vec4(x, y, z, 1.0f);
 
             camera_view_vector = pacman_position - camera_position_c;
         } else {
@@ -476,7 +476,7 @@ int main(int argc, char* argv[])
             float z = camera_lookat_l.z + r*cos(g_CameraPhi)*cos(g_CameraTheta);
             float x = camera_lookat_l.x + r*cos(g_CameraPhi)*sin(g_CameraTheta);
 
-            camera_position_c  = glm::vec4(x,0,z,1.0f);
+            camera_position_c  = glm::vec4(x,y,z,1.0f);
 
             camera_view_vector = camera_lookat_l - camera_position_c;
 
