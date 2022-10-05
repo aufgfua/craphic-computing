@@ -181,6 +181,9 @@ float g_AngleX = 0.0f;
 float g_AngleY = 0.0f;
 float g_AngleZ = 0.0f;
 
+
+int heartsCount = 0;
+
 // "g_LeftMouseButtonPressed = true" se o usuário está com o botão esquerdo do mouse
 // pressionado no momento atual. Veja função MouseButtonCallback().
 bool g_LeftMouseButtonPressed = false;
@@ -1821,6 +1824,13 @@ void initObjects(){
     initGhosts();
     initHearts();
 
+    heartsCount = 0;
+
+    for(auto obj = world_objects.begin(); obj != world_objects.end(); ++obj){
+        if(obj->object_type == HEART)
+            heartsCount ++;
+    }
+
 }
 
 void initHearts(){
@@ -2178,10 +2188,10 @@ bool collision(glm::vec4 pacman_position) {
                 if(ghostCollide(pacman_position, glm::vec4(obj->trans.x, obj->trans.y, obj->trans.z, 1))){
                     pacman_lives--;
                     if(pacman_lives == 0){
-                        printf("GAME OVER\n");
+                        printf("Você Morreu!\nGAME OVER!!\n");
                         exit(0);
                     } else {
-                        printf("Pacman perdeu uma vida :(\nVidas restantes: %d\n", pacman_lives);
+                        printf("\nPacman perdeu uma vida :(\nVidas restantes: %d\n", pacman_lives);
                         resetPacmanPosition();
                     }
                     return true;
@@ -2195,7 +2205,12 @@ bool collision(glm::vec4 pacman_position) {
             case HEART:
                 if(heartCollide(pacman_position, *obj)){
                     obj->active = false;
-                    printf("Um emblema capturado\n");
+                    heartsCount--;
+                    printf("\nUm emblema capturado!\n%d emblemas restantes\n", heartsCount);
+                    if(heartsCount == 0){
+                        printf("\n\nPARABÉNS!\nVocê capturou todos os emblemas e ganhou o jogo!!\n");
+                        exit(0);
+                    }
                     return false;
                 }
                 break;
