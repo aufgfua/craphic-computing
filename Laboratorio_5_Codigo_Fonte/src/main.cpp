@@ -225,6 +225,7 @@ GLuint g_NumLoadedTextures = 0;
 
 glm::vec4 pacman_position = glm::vec4(0.0f, 0.0f, -2.0f, 1.0f);
 glm::vec4 pacman_position_next = pacman_position;
+glm::vec4 pacman_position_next_vector = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
 glm::vec4 camera_position_c = pacman_position;
 
 bool isMovingRight, isMovingLeft, isMovingForward, isMovingBackward = false;
@@ -522,6 +523,11 @@ int main(int argc, char* argv[])
         }
 
 
+        if(pacman_position_next != pacman_position){
+            pacman_position_next_vector = pacman_position - pacman_position_next;
+            pacman_position_next_vector = pacman_position_next_vector / norm(pacman_position_next_vector);
+
+        }
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
         // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -583,10 +589,12 @@ int main(int argc, char* argv[])
 // porque agora a gente pode ter um array de objetos
 // e printar todos eles com a função draw_object que eu criei (que recebe um OBJETO)
 
+        float turned_angle = atan2(pacman_position_next_vector.x, pacman_position_next_vector.z) + M_PI;
+
         OBJETO sphere = {
             glm::vec3(pacman_position.x, pacman_position.y, pacman_position.z),
-            glm::vec3(1,1,1),
-            glm::vec3(-1,-1,-1),
+            glm::vec3(0.5,0.5,0.5),
+            glm::vec3(0,turned_angle,0),
             SPHERE,
             "sphere",
             1
@@ -682,7 +690,6 @@ void LoadTextureImage(const char* filename)
     glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 
     GLuint textureunit = g_NumLoadedTextures;
-    printf("\n%d\n",GL_TEXTURE0 + textureunit);
     glActiveTexture(GL_TEXTURE0 + textureunit);
     glBindTexture(GL_TEXTURE_2D, texture_id);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_SRGB8, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
@@ -1266,6 +1273,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         }
         g_CameraTheta -= movement_speed*dx;
 
+
         // Em coordenadas esféricas, o ângulo phi deve ficar entre -pi/2 e +pi/2.
         float phimax = 3.141592f/2;
         float phimin = -phimax;
@@ -1753,8 +1761,6 @@ void draw_object(OBJETO obj){
     glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
     glUniform1i(object_id_uniform, obj.object_type);
     glUniform3f(scale_proportion_uniform, obj.scal.x, obj.scal.y, obj.scal.z);
-    if(obj.object_type == PLANE)
-    printf("obj.scal.x = %f, obj.scal.y = %f, obj.scal.z = %f\n", obj.scal.x, obj.scal.y, obj.scal.z);
     DrawVirtualObject(obj.object_obj);
 
 }
