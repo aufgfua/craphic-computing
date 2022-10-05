@@ -231,6 +231,12 @@ glm::vec4 pacman_position_next = pacman_position;
 glm::vec4 pacman_position_next_vector = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
 glm::vec4 camera_position_c = pacman_position;
 
+void resetPacmanPosition();
+
+int pacman_lives = 3;
+
+bool collision(glm::vec4 pacman_position);
+
 std::vector<glm::vec4> ghostsRoutes;
 
 typedef struct DIRECTION_STR {
@@ -240,6 +246,15 @@ typedef struct DIRECTION_STR {
 #define GOING 0
 #define RETURNING 1
 std::vector<DIRECTION_STR> ghostDirection;
+
+
+bool ghostCollide(glm::vec4 pacman_position, glm::vec4 ghost_position);
+
+bool wallCollide(glm::vec4 pacman_position, OBJETO wall);
+
+bool heartCollide(glm::vec4 pacman_position, OBJETO heart);
+
+
 
 
 void initRoutes();
@@ -461,9 +476,15 @@ int main(int argc, char* argv[])
         glUseProgram(program_id);
 
 
+        bool colidido = collision(pacman_position_next);
+        bool podeMexer = 1;
 
+        if(colidido){
+        } else {
+            pacman_position = pacman_position_next;
+        }
 
-        pacman_position = pacman_position_next;
+        pacman_position_next = pacman_position;
 
         glm::vec4 camera_view_vector = glm::vec4(0.0f, 0.0f, 0.0f, 0.0f);
         if(view_mode == FIRST_PERSON){
@@ -609,7 +630,7 @@ int main(int argc, char* argv[])
 
         float turned_angle = atan2(pacman_position_next_vector.x, pacman_position_next_vector.z) + M_PI;
 
-        OBJETO sphere = {
+        OBJETO pacman = {
             glm::vec3(pacman_position.x, pacman_position.y, pacman_position.z),
             glm::vec3(0.5,0.5,0.5),
             glm::vec3(0,turned_angle,0),
@@ -618,7 +639,7 @@ int main(int argc, char* argv[])
             1
         };
 
-        draw_object(sphere);
+        draw_object(pacman);
 
         moveGhosts();
 
@@ -2140,6 +2161,73 @@ void moveGhosts(){
         }
     }
 }
+
+void resetPacmanPosition(){
+    pacman_position = glm::vec4(0, 0, -1, 1.0f);
+}
+
+
+bool collision(glm::vec4 pacman_position) {
+
+    for(auto obj = world_objects.begin(); obj != world_objects.end(); ++obj){
+        if(obj->active == false) continue;
+        switch(obj->object_type){
+            case SPHERE:
+                break;
+            case GHOST:
+                if(ghostCollide(pacman_position, glm::vec4(obj->trans.x, obj->trans.y, obj->trans.z, 1))){
+                    pacman_lives--;
+                    if(pacman_lives == 0){
+                        printf("GAME OVER\n");
+                        exit(0);
+                    } else {
+                        printf("Pacman perdeu uma vida :(\nVidas restantes: %d\n", pacman_lives);
+                        resetPacmanPosition();
+                    }
+                    return true;
+                }
+                break;
+            case PLANE:
+                if(wallCollide(pacman_position, *obj)){
+                    return true;
+                }
+                break;
+            case HEART:
+                if(heartCollide(pacman_position, *obj)){
+                    obj->active = false;
+                    printf("Um emblema capturado\n");
+                    return false;
+                }
+                break;
+
+        }
+    }
+    return false;
+
+}
+
+bool ghostCollide(glm::vec4 pacman_position, glm::vec4 ghost_position){
+    float distance = glm::length(pacman_position - ghost_position);
+    if(distance < 0.9){
+        return true;
+    }
+    return false;
+}
+
+bool wallCollide(glm::vec4 pacman_position, OBJETO wall){
+    return false;
+}
+
+bool heartCollide(glm::vec4 pacman_position, OBJETO heart){
+    float distance = glm::length(pacman_position - glm::vec4(heart.trans.x, heart.trans.y, heart.trans.z, 1));
+    if(distance < 0.9){
+        return true;
+    }
+    return false;
+}
+
+
+
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
 // vim: set spell spelllang=pt_br :
