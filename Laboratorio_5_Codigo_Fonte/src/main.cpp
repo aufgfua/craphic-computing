@@ -79,6 +79,7 @@ struct ObjModel
 // Declaração de funções utilizadas para pilha de matrizes de modelagem.
 void PushMatrix(glm::mat4 M);
 void PopMatrix(glm::mat4& M);
+glm::vec3 bezier(float time, float period, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4);
 
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
@@ -127,10 +128,9 @@ void initGhosts();
 void initHearts();
 
 void moveGhosts();
-
+void moveHearts();
 
 void draw_world_objects();
-
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
@@ -312,13 +312,9 @@ float ellapsed_seconds = seconds - old_seconds;
 float delta_time = ellapsed_seconds;
 
 
-int main(int argc, char* argv[])
-{
-
-
+int main(int argc, char* argv[]) {
 
     initRoutes();
-
 
     // Inicializamos a biblioteca GLFW, utilizada para criar uma janela do
     // sistema operacional, onde poderemos renderizar com OpenGL.
@@ -445,10 +441,7 @@ int main(int argc, char* argv[])
     glm::mat4 the_view;
 
     // Ficamos em loop, renderizando, até que o usuário feche a janela
-    while (!glfwWindowShouldClose(window))
-    {
-
-
+    while (!glfwWindowShouldClose(window)) {
         // Recuperamos o número de segundos que passou desde a execução do programa
         seconds = (float)glfwGetTime();
 
@@ -458,7 +451,6 @@ int main(int argc, char* argv[])
         old_seconds = seconds;
 
         delta_time = ellapsed_seconds;
-
 
         // Aqui executamos as operações de renderização
 
@@ -495,7 +487,6 @@ int main(int argc, char* argv[])
 
             camera_position_c = pacman_position;
 
-
             // Computamos a posição da câmera utilizando coordenadas esféricas.  As
             // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
             // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
@@ -514,7 +505,6 @@ int main(int argc, char* argv[])
             // look at
 
             glm::vec4 camera_lookat_l  = pacman_position; // Ponto "l", para onde a câmera (look-at) estará sempre olhando
-
 
             // e ScrollCallback().
             float r = g_CameraDistance;
@@ -643,21 +633,18 @@ int main(int argc, char* argv[])
         };
 
         draw_object(pacman);
+        float current_time = (float)glfwGetTime();
 
         moveGhosts();
-
+       // moveHearts();
         draw_world_objects();
-
-
-
-
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
         // passamos por todos os sistemas de coordenadas armazenados nas
         // matrizes the_model, the_view, e the_projection; e escrevemos na tela
         // as matrizes e pontos resultantes dessas transformações.
-        //glm::vec4 p_model(0.5f, 0.5f, 0.5f, 1.0f);
-        //TextRendering_ShowModelViewProjection(window, projection, view, model, p_model);
+        // glm::vec4 p_model(0.5f, 0.5f, 0.5f, 1.0f);
+        // TextRendering_ShowModelViewProjection(window, projection, view, model, p_model);
 
         // Imprimimos na tela os ângulos de Euler que controlam a rotação do
         // terceiro cubo.
@@ -683,7 +670,7 @@ int main(int argc, char* argv[])
         // definidas anteriormente usando glfwSet*Callback() serão chamadas
         // pela biblioteca GLFW.
         glfwPollEvents();
-    }
+        }
 
     // Finalizamos o uso dos recursos do sistema operacional
     glfwTerminate();
@@ -1270,8 +1257,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
         // variável abaixo para false.
         g_RightMouseButtonPressed = false;
     }
-    if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
-    {
+    if (button == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS) {
         // Se o usuário pressionou o botão esquerdo do mouse, guardamos a
         // posição atual do cursor nas variáveis g_LastCursorPosX e
         // g_LastCursorPosY.  Também, setamos a variável
@@ -1290,8 +1276,7 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
 
 // Função callback chamada sempre que o usuário movimentar o cursor do mouse em
 // cima da janela OpenGL.
-void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
-{
+void CursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
     // Abaixo executamos o seguinte: caso o botão esquerdo do mouse esteja
     // pressionado, computamos quanto que o mouse se movimento desde o último
     // instante de tempo, e usamos esta movimentação para atualizar os
@@ -2092,42 +2077,44 @@ void initRoutes(){
     ghostsRoutes.push_back(glm::vec4(9, ghostHeight, 9, 1));
     ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, 9, 1));
 
-
-
     ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, 5, 1));
     ghostsRoutes.push_back(glm::vec4(0, ghostHeight, 5, 1));
-
-
 
     ghostsRoutes.push_back(glm::vec4(7, ghostHeight, 1, 1));
     ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, 1, 1));
 
-
-
-
     ghostsRoutes.push_back(glm::vec4(9, ghostHeight, -3, 1));
     ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, -3, 1));
-
-
-
 
     ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, -5, 1));
     ghostsRoutes.push_back(glm::vec4(7, ghostHeight, -5, 1));
 
-
     ghostsRoutes.push_back(glm::vec4(9, ghostHeight, -9, 1));
     ghostsRoutes.push_back(glm::vec4(-9, ghostHeight, -9, 1));
-
 
     ghostsRoutes.push_back(glm::vec4(9, ghostHeight, 8, 1));
     ghostsRoutes.push_back(glm::vec4(9, ghostHeight, -8, 1));
 }
 
+float gHostSpeed = 2;
 
-void moveGhosts(){
+    void moveHearts() {
+        float current_time = (float)glfwGetTime();
+        for (auto obj = world_objects.begin(); obj != world_objects.end(); ++obj) {
+            if (obj->active && obj->object_type == HEART) {
+                float x = (float)obj->trans.x;
+                printf("%.2f", x);
+                glm::vec3 bz = bezier(current_time, 10.0, glm::vec3(x, 0, 2), glm::vec3(x + 1.0, 0, 3), glm::vec3(x + 2.0, 0, 4), glm::vec3(x, 0, 2));
+                obj->trans.x = bz.x;
+                obj->trans.y = bz.y;
+                obj->trans.z = bz.z;
+            }
+        }
+    }
+
+    void moveGhosts() {
 
     int ghostCount = 0;
-    int speed = 2;
 
     for(auto obj = world_objects.begin(); obj != world_objects.end(); ++obj){
         if(obj->active && obj->object_type == GHOST){
@@ -2159,9 +2146,8 @@ void moveGhosts(){
 
             direction = glm::normalize(direction);
 
-            obj->trans.x += direction.x * speed * delta_time;
-            obj->trans.z += direction.z * speed * delta_time;
-
+            obj->trans.x += direction.x * gHostSpeed * delta_time;
+            obj->trans.z += direction.z * gHostSpeed * delta_time;
 
             float turned_angle = atan2(direction.x, direction.z) - M_PI_2;
             obj->rotat.y = turned_angle;
@@ -2176,8 +2162,8 @@ void resetPacmanPosition(){
     pacman_position = glm::vec4(0, 0, -1, 1.0f);
 }
 
-
-bool collision(glm::vec4 pacman_position) {
+bool collision(glm::vec4 pacman_position)
+{
 
     for(auto obj = world_objects.begin(); obj != world_objects.end(); ++obj){
         if(obj->active == false) continue;
@@ -2218,7 +2204,14 @@ bool collision(glm::vec4 pacman_position) {
         }
     }
     return false;
+}
 
+glm::vec3 bezier(float time, float period, glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec3 p4) {
+    float t = (time / period) - floor(time / period);
+    return (1 - t) * (1 - t) * (1 - t) * p1 +
+           3 * t * (1 - t) * (1 - t) * p2 +
+           3 * t * t * (1 - t) * p3 +
+           t * t * t * p4;
 }
 
 bool ghostCollide(glm::vec4 pacman_position, glm::vec4 ghost_position){
