@@ -1794,7 +1794,7 @@ void draw_object(OBJETO obj){
     glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
     glUniform1i(object_id_uniform, obj.object_type);
     glUniform3f(scale_proportion_uniform, obj.scal.x, obj.scal.y, obj.scal.z);
-    DrawVirtualObject(obj.object_obj); 
+    DrawVirtualObject(obj.object_obj);
 
 }
 
