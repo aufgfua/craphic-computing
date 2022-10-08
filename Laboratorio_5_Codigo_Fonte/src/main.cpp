@@ -636,7 +636,7 @@ int main(int argc, char* argv[]) {
         float current_time = (float)glfwGetTime();
 
         moveGhosts();
-       // moveHearts();
+        moveHearts();
         draw_world_objects();
 
         // Pegamos um vértice com coordenadas de modelo (0.5, 0.5, 0.5, 1) e o
@@ -2097,19 +2097,31 @@ void initRoutes(){
 }
 
 float gHostSpeed = 2;
-
+float lastTime = 0;
     void moveHearts() {
+        #define PERIOD 10.0
+        glm::vec3 lastBz;
+        glm::vec3 point1 = glm::vec3(0, 0, 0);
+        glm::vec3 point2 = glm::vec3(0.5, 0, 0.5);
+        glm::vec3 point3 = glm::vec3(-0.5, 0, -0.5);
+        glm::vec3 point4 = glm::vec3(0, 0, 0);
+        if(lastTime == 0){
+            lastBz = glm::vec3(0, 0, 0);
+        } else {
+            lastBz = bezier(lastTime, PERIOD, point1, point2, point3, point4);
+        }
         float current_time = (float)glfwGetTime();
+        lastTime = current_time;
+
         for (auto obj = world_objects.begin(); obj != world_objects.end(); ++obj) {
             if (obj->active && obj->object_type == HEART) {
-                float x = (float)obj->trans.x;
-                printf("%.2f", x);
-                glm::vec3 bz = bezier(current_time, 10.0, glm::vec3(x, 0, 2), glm::vec3(x + 1.0, 0, 3), glm::vec3(x + 2.0, 0, 4), glm::vec3(x, 0, 2));
-                obj->trans.x = bz.x;
-                obj->trans.y = bz.y;
-                obj->trans.z = bz.z;
+                glm::vec3 bz = bezier(current_time, PERIOD, point1, point2, point3, point4);
+                obj->trans.x += bz.x - lastBz.x;
+                obj->trans.y += bz.y - lastBz.y;
+                obj->trans.z += bz.z - lastBz.z;
             }
         }
+
     }
 
     void moveGhosts() {

@@ -1,0 +1,1 @@
+CMakeLists.txt not found in /home/wind/graphic-computing/Laboratorio_5_Codigo_Fonte Select CMakeLists.txt
