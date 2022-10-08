@@ -45,8 +45,14 @@ bool heartCollide(glm::vec4 pacman_position, OBJETO heart){
     glm::vec3 bbox_min = getBoundingBoxMin("heart");
     glm::vec3 bbox_max = getBoundingBoxMax("heart");
     glm::vec4 heartPosition = glm::vec4(heart.trans.x, heart.trans.y, heart.trans.z, 1);
+
+    // a esfera tem um raio de captura ao redor dela, então se o coração estiver dentro desse raio, ele é capturado
+    float captureRadius = 0.2;
+    float pacmanScale = 0.4;
+    float pacmanRadius = abs(bbox_max.x - bbox_min.x) * pacmanScale / 2; // /2 due to diameter to radius
+    float finalSphereRadius =  pacmanRadius + captureRadius;
     float distance = glm::length(pacman_position - heartPosition);
-    if(distance < 0.9){
+    if(distance < finalSphereRadius){
         return true;
     }
     return false;
