@@ -48,6 +48,7 @@
 #include "utils.h"
 #include "matrices.h"
 
+
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
 struct ObjModel
@@ -251,7 +252,7 @@ typedef struct DIRECTION_STR {
 std::vector<DIRECTION_STR> ghostDirection;
 
 
-bool ghostCollide(glm::vec4 pacman_position, glm::vec4 ghost_position);
+bool ghostCollide(glm::vec4 pacman_position, OBJETO ghost);
 
 bool wallCollide(glm::vec4 pacman_position, OBJETO wall);
 
@@ -311,6 +312,7 @@ float old_seconds = (float)glfwGetTime();
 float ellapsed_seconds = seconds - old_seconds;
 float delta_time = ellapsed_seconds;
 
+#include "collisions.cpp"
 
 int main(int argc, char* argv[]) {
 
@@ -731,6 +733,8 @@ void LoadTextureImage(const char* filename)
 
     g_NumLoadedTextures += 1;
 }
+
+
 
 // Função que desenha um objeto armazenado em g_VirtualScene. Veja definição
 // dos objetos na função BuildTrianglesAndAddToVirtualScene().
@@ -2183,7 +2187,7 @@ bool collision(glm::vec4 pacman_position)
             case SPHERE:
                 break;
             case GHOST:
-                if(ghostCollide(pacman_position, glm::vec4(obj->trans.x, obj->trans.y, obj->trans.z, 1))){
+                if(ghostCollide(pacman_position, *obj)){
                     pacman_lives--;
                     if(pacman_lives == 0){
                         printf("Você Morreu!\nGAME OVER!!\n");
@@ -2225,28 +2229,6 @@ glm::vec3 bezier(float time, float period, glm::vec3 p1, glm::vec3 p2, glm::vec3
            3 * t * t * (1 - t) * p3 +
            t * t * t * p4;
 }
-
-bool ghostCollide(glm::vec4 pacman_position, glm::vec4 ghost_position){
-    float distance = glm::length(pacman_position - ghost_position);
-    if(distance < 0.9){
-        return true;
-    }
-    return false;
-}
-
-bool wallCollide(glm::vec4 pacman_position, OBJETO wall){
-    return false;
-}
-
-bool heartCollide(glm::vec4 pacman_position, OBJETO heart){
-    float distance = glm::length(pacman_position - glm::vec4(heart.trans.x, heart.trans.y, heart.trans.z, 1));
-    if(distance < 0.9){
-        return true;
-    }
-    return false;
-}
-
-
 
 
 // set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
