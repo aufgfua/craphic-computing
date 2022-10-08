@@ -2100,7 +2100,7 @@ void initRoutes(){
     ghostsRoutes.push_back(glm::vec4(9, ghostHeight, -8, 1));
 }
 
-float gHostSpeed = 2;
+float ghostSpeed = 2.5;
 float lastTime = 0;
     void moveHearts() {
         #define PERIOD 10.0
@@ -2162,8 +2162,8 @@ float lastTime = 0;
 
             direction = glm::normalize(direction);
 
-            obj->trans.x += direction.x * gHostSpeed * delta_time;
-            obj->trans.z += direction.z * gHostSpeed * delta_time;
+            obj->trans.x += direction.x * ghostSpeed * delta_time;
+            obj->trans.z += direction.z * ghostSpeed * delta_time;
 
             float turned_angle = atan2(direction.x, direction.z) - M_PI_2;
             obj->rotat.y = turned_angle;
@@ -2208,6 +2208,7 @@ bool collision(glm::vec4 pacman_position)
                 if(heartCollide(pacman_position, *obj)){
                     obj->active = false;
                     heartsCount--;
+                    ghostSpeed += 0.25;
                     printf("\nUm emblema capturado!\n%d emblemas restantes\n", heartsCount);
                     if(heartsCount == 0){
                         printf("\n\nPARABÉNS!\nVocê capturou todos os emblemas e ganhou o jogo!!\n");
